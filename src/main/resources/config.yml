@@ -1,0 +1,26 @@
+# Partikül sistemi (dev.pucky.particle.ParticleEngine) limitleri.
+# Sunucu sahibi recompile etmeden tune edebilir; tümü opsiyoneldir, eksik
+# anahtarlar ParticleLimits.DEFAULTS'tan gelir.
+particles:
+  # Motor tamamen kapatılsın mı? false ise submit() edilen efektler sessizce yok sayılır.
+  enabled: true
+  # Merkezi tick task'ının periyodu (tick). Düşürmek CPU yükünü, yükseltmek akıcılığı azaltır.
+  tick-interval: 2
+  # Bir efektin görünür olabileceği maksimum mesafe (blok). Bu yarıçapın dışındaki oyunculara hiç partikül yollanmaz.
+  view-distance: 48
+  # Tüm aktif efektler toplamında, tek bir tick'te render edilebilecek maksimum nokta sayısı (global bütçe).
+  global-max-points-per-tick: 1500
+  # Sunucu genelinde aynı anda aktif olabilecek maksimum efekt sayısı (abuse koruması).
+  max-active-effects: 64
+  # Tek bir oyuncunun aynı anda sahip olabileceği maksimum efekt sayısı (abuse koruması).
+  max-effects-per-player: 3
+  # Bir şeklin üretebileceği maksimum nokta sayısı; aşılırsa noktalar kırpılır ve uyarı loglanır.
+  max-points-per-shape: 400
+  # Şekil noktaları arasındaki minimum mesafe (blok); bundan yakın noktalar elenir.
+  min-spacing: 0.15
+  # Bir efektin alabileceği maksimum süre (saniye); bu değer her zaman sunucu tarafında zorlanır.
+  max-duration-seconds: 30
+  # TPS bu eşiğin altına düşerse efekt yoğunluğu otomatik olarak azaltılır.
+  tps-throttle-threshold: 18.0
+  # TPS bu eşiğin altına düşerse düşük öncelikli efektler tamamen duraklatılır.
+  tps-pause-threshold: 14.0

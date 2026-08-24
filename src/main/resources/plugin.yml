@@ -1,0 +1,5 @@
+name: ParticleEngineLibrary
+version: '1.0.0'
+main: dev.pucky.ParticleEngineLibrary
+api-version: '1.21'
+load: POSTWORLD

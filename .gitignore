@@ -1,0 +1,16 @@
+# Maven
+target/
+
+# IntelliJ IDEA
+*.iml
+.idea/
+
+# Diğer editörler
+.vscode/
+
+# Derleme çıktısı
+*.class
+
+# İşletim sistemi
+.DS_Store
+Thumbs.db
