@@ -53,6 +53,9 @@ public final class ParticleEngine {
     // rotatedOrder(), bu değere göre adil bir sıralama üretir.
     private static int tickRotationOffset = 0;
 
+    private static final long LIMIT_WARN_INTERVAL_MILLIS = 5000;
+    private static long lastLimitWarnMillis = 0;
+
     private ParticleEngine() {}
 
     /**
@@ -116,8 +119,21 @@ public final class ParticleEngine {
         if (!limits.enabled())
             return null;
 
+        if (effect == null || effect.shape() == null || effect.origin() == null || effect.gradient() == null || effect.particle() == null) {
+            Logging.fail("Eksik tanımlanmış bir efekt reddedildi (shape, origin, gradient veya particle null).");
+            return null;
+        }
+
+        Particle particle = effect.particle();
+        Class<?> dataType = particle.getDataType();
+        boolean validData = dataType == Void.class ? effect.data() == null : dataType.isInstance(effect.data());
+        if (particle != Particle.DUST && !validData) {
+            Logging.fail(particle.getKey() + " partikülü " + dataType.getSimpleName() + " türünde veri gerektiriyor, efekt reddedildi.");
+            return null;
+        }
+
         if (active.size() >= limits.maxActiveEffects()) {
-            Logging.warn("Sunucu genelinde aktif efekt limiti (" + limits.maxActiveEffects() + ") doldu, yeni efekt reddedildi.");
+            warnLimit("Sunucu genelinde aktif efekt limiti (" + limits.maxActiveEffects() + ") doldu, yeni efekt reddedildi.");
             return null;
         }
 
@@ -128,7 +144,7 @@ public final class ParticleEngine {
                     .count();
 
             if (ownerCount >= limits.maxEffectsPerPlayer()) {
-                Logging.warn(owner.getName() + " isimli oyuncunun aktif efekt limiti (" + limits.maxEffectsPerPlayer() + ") doldu.");
+                warnLimit(owner.getName() + " isimli oyuncunun aktif efekt limiti (" + limits.maxEffectsPerPlayer() + ") doldu.");
                 return null;
             }
         }
@@ -140,6 +156,15 @@ public final class ParticleEngine {
         UUID id = UUID.randomUUID();
         active.put(id, new ActiveEffect(effect));
         return new Handle(id);
+    }
+
+    private static void warnLimit(String message) {
+        long now = System.currentTimeMillis();
+        if (now - lastLimitWarnMillis < LIMIT_WARN_INTERVAL_MILLIS)
+            return;
+
+        lastLimitWarnMillis = now;
+        Logging.warn(message);
     }
 
     /** Belirli bir efekti, tick bazında uzunluğundan bağımsız olarak anında yok eder. */
@@ -186,17 +211,20 @@ public final class ParticleEngine {
             if (activeEffect == null)
                 continue;
 
-            activeEffect.advance(limits.tickIntervalTicks());
-
-            if (activeEffect.expired()) {
-                active.remove(id);
-                continue;
+            if (remainingBudget > 0) {
+                try {
+                    remainingBudget = render(activeEffect, pointStep, remainingBudget);
+                } catch (RuntimeException e) {
+                    active.remove(id);
+                    Logging.fail("Bir efekt render edilirken hata oluştu ve kaldırıldı: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+                    continue;
+                }
             }
 
-            if (remainingBudget <= 0)
-                continue;
+            activeEffect.advance(limits.tickIntervalTicks());
 
-            remainingBudget = render(activeEffect, pointStep, remainingBudget);
+            if (activeEffect.expired())
+                active.remove(id);
         }
 
         tickRotationOffset++;
@@ -333,7 +361,7 @@ public final class ParticleEngine {
             }
         } else {
             for (Player viewer : viewers) {
-                viewer.spawnParticle(effect.particle(), location, 1);
+                viewer.spawnParticle(effect.particle(), location, 1, 0, 0, 0, 0, effect.data());
             }
         }
     }

@@ -39,6 +39,9 @@ public class ParticleEffect {
     @Builder.Default
     private Particle particle = Particle.DUST;
 
+    @Builder.Default
+    private Object data = null;
+
     /** Şekil boyunca uygulanacak renk geçişi. Varsayılan beyaz tek renk. */
     @Builder.Default
     private Gradient gradient = Gradient.solid(Color.WHITE);

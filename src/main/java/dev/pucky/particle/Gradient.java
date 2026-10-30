@@ -48,12 +48,23 @@ public final class Gradient {
 
     /** Hex formatında bir rengi Bukkit {@link Color}'a çevirir. */
     public static Color fromHex(String hex) {
+        if (!isValidHex(hex))
+            throw new IllegalArgumentException("Geçersiz hex rengi: " + hex);
+
         String cleaned = hex.startsWith("#") ? hex.substring(1) : hex;
         int rgb = Integer.parseInt(cleaned, 16);
         int r = (rgb >> 16) & 0xFF;
         int g = (rgb >> 8) & 0xFF;
         int b = rgb & 0xFF;
         return Color.fromRGB(r, g, b);
+    }
+
+    public static boolean isValidHex(String hex) {
+        if (hex == null)
+            return false;
+
+        String cleaned = hex.startsWith("#") ? hex.substring(1) : hex;
+        return cleaned.matches("[0-9a-fA-F]{6}");
     }
 
     /**
