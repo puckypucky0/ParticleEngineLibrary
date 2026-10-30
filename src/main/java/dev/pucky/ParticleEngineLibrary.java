@@ -11,7 +11,7 @@ public final class ParticleEngineLibrary extends JavaPlugin {
     public void onEnable() {
         instance = this;
         this.saveDefaultConfig();
-        Logging.inform("ParticleEngine başlatılıyor.");
+        Logging.inform("Starting Particle Engine");
 
         ParticleEngine.init();
     }
